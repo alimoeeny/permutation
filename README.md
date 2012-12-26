@@ -20,9 +20,14 @@ Then run
 
 	go get github.com/nightlyone/permutation
 
+Play around with it using the [example][6]
+
+	go run github.com/nightlyone/permutation/example/main.go
+
 [3]: http://golang.org
 [4]: http://golang.org/doc/install/source
 [5]: http://golang.org/doc/install
+[6]: http://github.com/nightlyone/permutation/tree/master/example/main.go
 
 LICENSE
 -------
