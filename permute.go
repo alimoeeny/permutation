@@ -9,7 +9,7 @@ import (
 // Sequence is the interface you need to implement, to allow permutations of it.
 // It must consist of independent elements.
 type Sequence interface {
-	sort.Sequence
+	sort.Interface
 	// Return whether seqence q matches the receiver
 	Equal(q Sequence) bool
 	// Create a copy of the sequence. Only the indexes need to be independent.
