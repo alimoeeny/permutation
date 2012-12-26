@@ -2,7 +2,8 @@ permutation
 =========
 Permutations are fun
 
-So this package provides a basic version for bytes
+So this package provides a naive implementation for any type implementing the interface
+permutation.Sequence
 
 [![Build Status][1]][2]
 
