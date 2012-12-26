@@ -1,0 +1,4 @@
+permutation
+===========
+
+permutation in Go
