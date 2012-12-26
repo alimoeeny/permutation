@@ -5,18 +5,18 @@ import (
 	"testing"
 )
 
+type byteSlice []byte
+
+func (p byteSlice) Len() int              { return len(p) }
+func (p byteSlice) Less(i, j int) bool    { return p[i] < p[j] }
+func (p byteSlice) Swap(i, j int)         { p[i], p[j] = p[j], p[i] }
+func (p byteSlice) Equal(q Sequence) bool { return bytes.Compare(p, q.(byteSlice)) == 0 }
+func (p byteSlice) Copy() Sequence        { return p[:] }
+
 type permTest struct {
 	seq   []byte
 	perms [][]byte
 }
-
-type byteSlice []byte
-
-func (p byteSlice) Len() int               { return len(p) }
-func (p byteSlice) Less(i, j int) bool     { return p[i] < p[j] }
-func (p byteSlice) Swap(i, j int)          { p[i], p[j] = p[j], p[i] }
-func (p byteSlice) Equal(q Interface) bool { return bytes.Compare(p, q.(byteSlice)) == 0 }
-func (p byteSlice) Copy() Interface        { return p[:] }
 
 var permsPositive = [...]permTest{
 	{
@@ -35,14 +35,12 @@ var permsPositive = [...]permTest{
 func TestNext(t *testing.T) {
 	for test, a := range permsPositive {
 		p := New(byteSlice(a.seq))
-		i := 0
-		for ok, seq := true, p.Current().(byteSlice); ok; ok, seq = p.Next(), p.Current().(byteSlice) {
+		for i, ok, seq := 0, true, p.Current().(byteSlice); ok; i, ok, seq = i+1, p.Next(), p.Current().(byteSlice) {
 			if string(seq) != string(a.perms[i]) {
 				t.Errorf("%d: seq=%s, want=%s, got=%s", test, a.seq, a.perms[i], seq)
 			} else {
 				t.Logf("%d: seq=%s, want=%s, got=%s", test, a.seq, a.perms[i], seq)
 			}
-			i++
 		}
 	}
 }
