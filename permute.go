@@ -1,88 +1,87 @@
 package permutation
 
-// Naive permutation implementation on bytes
+// Naive permutation implementation
 
 import (
-	"bytes"
 	"sort"
 )
 
-type byteSlice []byte
+// Sequence is the interface you need to implement, to allow permutations of it.
+// It must consist of independent elements.
+type Sequence interface {
+	sort.Sequence
+	// Return whether seqence q matches the receiver
+	Equal(q Sequence) bool
+	// Create a copy of the sequence. Only the indexes need to be independent.
+	Copy() Sequence
+}
 
-func (p byteSlice) Len() int           { return len(p) }
-func (p byteSlice) Less(i, j int) bool { return p[i] < p[j] }
-func (p byteSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-
-func nextBytePermutation(seq []byte) bool {
-	for j := len(seq) - 1; j > 0; j-- {
-		if v := seq[j-1]; v < seq[j] {
-			m := len(seq) - 1
-			for v > seq[m] {
+func nextPermutation(seq Sequence) bool {
+	for j := seq.Len() - 1; j > 0; j-- {
+		if seq.Less(j-1, j) {
+			m := seq.Len() - 1
+			for seq.Less(m, j-1) {
 				m--
 			}
-			seq[j-1], seq[m] = seq[m], seq[j-1]
-			reverse(seq[j:])
+			seq.Swap(j-1, m)
+			reverse(seq, j)
 			return true
 		}
 	}
 	return false
 }
 
-// reverse a sequence of bytes in place. Thanks Russ Cox!
-func reverse(seq []byte) {
-	for i, j := 0, len(seq)-1; i < j; i, j = i+1, j-1 {
-		seq[i], seq[j] = seq[j], seq[i]
+// reverse a sequence of in place.
+func reverse(seq Sequence, start int) {
+	for i, j := start, seq.Len()-1; i < j; i, j = i+1, j-1 {
+		seq.Swap(i, j)
 	}
 }
 
-// permutation on bytes
-type BytePermutation struct {
-	seq []byte
+// Generic permutation type
+type Permutation struct {
+	seq Sequence
 }
 
-
-// Initializes a byte permutation and returns it
-func NewBytePermutation(seq []byte) *BytePermutation {
-	if !sort.IsSorted(byteSlice(seq)) {
-		current := make([]byte, len(seq), len(seq))
-		copy(current, seq)
-		sort.Sort(byteSlice(current))
-		return &BytePermutation{seq: current}
+// Initializes a permutation from seqence seq and returns it
+// TODO: Always copy it?
+func New(seq Sequence) *Permutation {
+	if !sort.IsSorted(seq) {
+		sort.Sort(seq)
 	}
-	return &BytePermutation{seq: seq}
+	return &Permutation{seq: seq}
 }
 
-// Returns the current sequence of bytes
-func (p *BytePermutation) Current() []byte {
+// Returns the current sequence
+func (p *Permutation) Current() Sequence {
 	return p.seq
 }
 
-// Generates the next permutation of bytes and returns, whether it is different
-// Use Current() to get the next one
-func (p *BytePermutation) Next() bool {
+// Generates the next permutation in place and returns, whether it is different.
+// Use Current() to get newly generated sequence
+func (p *Permutation) Next() bool {
 	next, valid := nextPerm(p.seq)
 	p.seq = next
 	return valid
 }
 
 // How many possible permutations of this sequence exist?
-func (p *BytePermutation) Len() int {
+func (p *Permutation) Len() int {
 	result := 1
-	for i := 2; i <= len(p.seq); i++ {
+	for i := 2; i <= p.seq.Len(); i++ {
 		result *= i
 	}
 	return result
 }
 
-func nextPerm(seq []byte) (next []byte, valid bool) {
-	current := make([]byte, len(seq), len(seq))
-	copy(current, seq)
+func nextPerm(seq Sequence) (next Sequence, valid bool) {
+	current := seq.Copy()
 
-	for i := 1; i < len(seq); i++ {
-		if ok := nextBytePermutation(seq); !ok {
+	for i := 1; i < seq.Len(); i++ {
+		if ok := nextPermutation(seq); !ok {
 			return seq, false
 		}
-		if ok := bytes.Compare(current, seq) != 0; ok {
+		if ok := !seq.Equal(current); ok {
 			return seq, true
 		}
 	}
