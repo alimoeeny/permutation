@@ -20,7 +20,7 @@ func nextPermutation(seq Sequence) bool {
 	for j := seq.Len() - 1; j > 0; j-- {
 		if seq.Less(j-1, j) {
 			m := seq.Len() - 1
-			for seq.Less(m, j-1) {
+			for !seq.Less(j-1, m) && m > j {
 				m--
 			}
 			seq.Swap(j-1, m)
